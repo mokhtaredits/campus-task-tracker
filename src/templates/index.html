@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Campus Task Tracker</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; background: #eef4f3; color: #172f2c; font: 1rem/1.55 "Segoe UI", sans-serif; }
+    main { max-width: 46rem; margin: 8vh auto; padding: 0 1rem; }
+    h1 { margin: 0 0 1.2rem; font-size: clamp(1.9rem, 6vw, 2.8rem); }
+    .panel { padding: 1.25rem; background: white; border: 1px solid #ceded9; border-radius: .8rem; }
+    label { display: block; font-weight: 600; margin-bottom: .4rem; }
+    .controls, .actions { display: flex; gap: .5rem; }
+    input { flex: 1; min-width: 0; padding: .65rem; border: 1px solid #839c96; border-radius: .4rem; font: inherit; }
+    button { padding: .6rem .85rem; border: 1px solid #156052; border-radius: .4rem; background: #156052; color: white; font: inherit; cursor: pointer; }
+    .secondary { background: white; color: #1b5147; }
+    ul { list-style: none; margin: 1rem 0 0; padding: 0; }
+    li { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .65rem; border-top: 1px solid #dce8e4; padding: .8rem 0; }
+    .title { overflow-wrap: anywhere; font-weight: 600; }
+    small { display: block; color: #3c615a; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Campus Task Tracker</h1>
+    <section class="panel" aria-label="Tasks">
+      <form method="post" action="{{ url_for('add_task') }}">
+        <label for="title">New task</label>
+        <div class="controls">
+          <input id="title" name="title" maxlength="120" required placeholder="Review Docker lab notes">
+          <button type="submit">Add task</button>
+        </div>
+      </form>
+      {% if tasks %}
+      <ul>
+        {% for task in tasks %}
+        <li>
+          <div>
+            <span class="title">{{ task.title }}</span>
+            <small>{{ 'Completed' if task.completed else 'Pending' }}</small>
+          </div>
+          <div class="actions">
+            <form method="post" action="{{ url_for('toggle_task', task_id=task.id) }}">
+              <button class="secondary" type="submit">{{ 'Reopen' if task.completed else 'Complete' }}</button>
+            </form>
+            <form method="post" action="{{ url_for('delete_task', task_id=task.id) }}">
+              <button class="secondary" type="submit">Delete</button>
+            </form>
+          </div>
+        </li>
+        {% endfor %}
+      </ul>
+      {% else %}
+      <p>No tasks yet.</p>
+      {% endif %}
+    </section>
+  </main>
+</body>
+</html>
