@@ -1,0 +1,32 @@
+name: Docker CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - name: Build Docker image
+        run: docker compose build
+      - name: Start container and wait for health check
+        run: docker compose up -d --wait --wait-timeout 60
+      - name: Smoke test task creation
+        run: |
+          curl -fsS http://127.0.0.1:8000/health | grep -F '"status":"ok"'
+          curl -fsS -L --data-urlencode 'title=CI demo task' http://127.0.0.1:8000/tasks | grep -F 'CI demo task'
+      - name: Print failure logs
+        if: failure()
+        run: docker compose logs
+      - name: Stop test container and remove test data
+        if: always()
+        run: docker compose down -v
